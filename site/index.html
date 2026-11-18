@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teste de CORS com HTTP 307</title>
+  <style>
+    body { font: 1rem/1.5 system-ui, sans-serif; max-width: 44rem; margin: 3rem auto; padding: 0 1rem; }
+    button { font: inherit; padding: .45rem .75rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Teste de CORS com HTTP 307</h1>
+    <p>Abra o DevTools e marque <strong>Preserve log</strong> em <strong>Network</strong>.
+      O botão leva o navegador à página na porta 8090, que chama a API na 8070.</p>
+    <form action="/redirecionar" method="get">
+      <button id="redirecionar" type="submit">Testar redirecionamento</button>
+    </form>
+  </main>
+</body>
+</html>

@@ -1,0 +1,29 @@
+services:
+  origem:
+    image: httpd:2.4
+    command: [httpd-foreground, -c, 'Include /demo/apache/origem.conf']
+    ports:
+      - target: 80
+        published: '${PORTA_ORIGEM:-8080}'
+        host_ip: '${IP_ORIGEM:-::1}'
+    volumes:
+      - ./apache:/demo/apache:ro
+      - ./site:/demo/site:ro
+
+  destino:
+    image: httpd:2.4
+    command: [httpd-foreground, -c, 'Include /demo/apache/destino.conf']
+    ports:
+      - '127.0.0.1:8090:80'
+    volumes:
+      - ./apache:/demo/apache:ro
+      - ./destino:/demo/destino:ro
+
+  api:
+    image: httpd:2.4
+    command: [httpd-foreground, -c, 'Include /demo/apache/api.conf']
+    ports:
+      - '127.0.0.1:8070:80'
+    volumes:
+      - ./apache:/demo/apache:ro
+      - ./api:/demo/api:ro

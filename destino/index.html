@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chamada à API na porta 8070</title>
+  <style>
+    body { font: 1rem/1.5 system-ui, sans-serif; max-width: 44rem; margin: 3rem auto; padding: 0 1rem; }
+    button { font: inherit; padding: .45rem .75rem; }
+    pre { padding: 1rem; background: #f2f4f6; white-space: pre-wrap; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Chamada à API na porta 8070</h1>
+    <p>Ao carregar, esta página envia um POST para <code>/redirecionar-api</code> com JSON
+      e o cabeçalho <code>X-Demo-Token</code>. A rota responde com 307 para a API na porta 8070.</p>
+    <pre id="resultado" role="status">Aguardando a chamada à API…</pre>
+    <button id="direto" type="button">Testar sem X-Demo-Token</button>
+  </main>
+  <script>
+    const resultado = document.querySelector('#resultado');
+    const testeDireto = document.querySelector('#direto');
+
+    async function chamarApi(url, cabecalhos = {}) {
+      testeDireto.disabled = true;
+      resultado.textContent = 'Enviando POST…';
+      try {
+        const resposta = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...cabecalhos },
+          body: JSON.stringify({ mensagem: 'teste de CORS' }),
+        });
+        resultado.textContent = `HTTP ${resposta.status} · ${resposta.url}\n\n${await resposta.text()}`;
+      } catch (erro) {
+        resultado.textContent = `Falha no fetch (${erro.message}). Veja o OPTIONS em Network e a mensagem em Console.`;
+      } finally {
+        testeDireto.disabled = false;
+      }
+    }
+
+    testeDireto.addEventListener('click', () => chamarApi('http://localhost:8070/receber.cgi'));
+    chamarApi('/redirecionar-api', { 'X-Demo-Token': 'demo' });
+  </script>
+</body>
+</html>
