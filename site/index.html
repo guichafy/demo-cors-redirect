@@ -3,20 +3,63 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Teste de CORS com HTTP 307</title>
+  <title>CORS no Apache · início da demonstração</title>
   <style>
-    body { font: 1rem/1.5 system-ui, sans-serif; max-width: 44rem; margin: 3rem auto; padding: 0 1rem; }
-    button { font: inherit; padding: .45rem .75rem; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #edf2f7; color: #172839; font: 1rem/1.5 system-ui, sans-serif; }
+    main { max-width: 70rem; margin: auto; padding: clamp(1rem, 4vw, 3rem); }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(2rem, 5vw, 3.45rem); line-height: 1.08; letter-spacing: -.045em; }
+    h2, h3 { font-size: 1.2rem; line-height: 1.3; }
+    .intro { margin-top: .65rem; max-width: 66ch; color: #41566b; }
+    form { margin-top: 1.5rem; }
+    button { font: inherit; min-height: 2.65rem; padding: .45rem .75rem; border-radius: .35rem; border: 1px solid #17499e; background: #17499e; color: white; cursor: pointer; }
+    :focus-visible { outline: 3px solid #285ed1; outline-offset: 3px; }
+    section { margin-top: 1.25rem; }
+    .percurso { padding: .8rem 1rem; border: 1px solid #bfcedc; border-radius: .45rem; }
+    ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin: .75rem 0 0; padding: 0; list-style: none; }
+    li { display: grid; grid-template-columns: 3.25rem minmax(0, 1fr); gap: .7rem; }
+    .codigo { display: grid; min-height: 2rem; place-items: center; align-self: start; border-radius: .35rem; background: #e3ecf5; color: #234363; font-weight: 700; }
+    li p { color: #41566b; font-size: .9rem; }
+    .comparacao { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: .75rem; }
+    article { min-width: 0; border: 1px solid #c2d0dd; border-top: 4px solid; border-radius: .45rem; background: white; padding: 1rem; }
+    .com-erro { border-top-color: #a83626; }
+    .corrigido { border-top-color: #23704d; }
+    article p { margin-top: .4rem; color: #41566b; }
+    @media (max-width: 46rem) { ol, .comparacao { grid-template-columns: minmax(0, 1fr); } }
   </style>
 </head>
 <body>
   <main>
-    <h1>Teste de CORS com HTTP 307</h1>
-    <p>Abra o DevTools e marque <strong>Preserve log</strong> em <strong>Network</strong>.
-      O botão leva o navegador à página na porta 8090, que chama a API na 8070.</p>
+    <h1>CORS no Apache</h1>
+    <p class="intro">Compare o mesmo POST em dois Apaches e veja por que um <code>OPTIONS</code>
+      com <code>204</code> ainda pode terminar em bloqueio de CORS.</p>
     <form action="/redirecionar" method="get">
       <button id="redirecionar" type="submit">Testar redirecionamento</button>
     </form>
+    <section class="percurso" aria-labelledby="percurso">
+      <h2 id="percurso">Da página ao POST</h2>
+      <ol>
+        <li><code class="codigo">307</code><div><strong>8080 → 8090</strong><p>A navegação abre a comparação.</p></div></li>
+        <li><code class="codigo">307</code><div><strong>8090 → 8070 e 8071</strong><p>Cada fetch cruza origens e preserva o POST.</p></div></li>
+        <li><code class="codigo">204</code><div><strong>Preflight OPTIONS</strong><p>O navegador confere quais cabeçalhos as APIs permitem.</p></div></li>
+      </ol>
+    </section>
+    <section aria-labelledby="comparacao">
+      <h2 id="comparacao">O que a comparação mostra</h2>
+      <div class="comparacao">
+        <article class="com-erro">
+          <h3>Com erro na porta 8071</h3>
+          <p>Alterne entre a ausência de <code>Content-Type</code> causada por <code>set</code> e a de
+            <code>X-Demo-Token</code> no cenário original.</p>
+        </article>
+        <article class="corrigido">
+          <h3>Corrigido na porta 8070</h3>
+          <p>O <code>merge</code> permite <code>Content-Type</code> e <code>X-Demo-Token</code>.
+            O POST retorna <code>HTTP 200</code>.</p>
+        </article>
+      </div>
+    </section>
   </main>
 </body>
 </html>

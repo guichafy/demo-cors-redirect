@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Preflight de CORS na API</title>
+  <style>
+    body { font: 1rem/1.5 system-ui, sans-serif; max-width: 44rem; margin: 3rem auto; padding: 0 1rem; }
+    code { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Preflight de CORS na API</h1>
+    <p>Os Apaches das portas <code>8070</code> e <code>8071</code> usam o mesmo endpoint
+      <code>/receber.cgi</code>. A <a href="http://localhost:8090/">comparação interativa</a>
+      envia o mesmo POST a cada um.</p>
+    <section aria-labelledby="como-funciona">
+      <h2 id="como-funciona">Por que o erro aparece depois do 307?</h2>
+      <p>O <code>fetch</code> começa na mesma origem da página, na <code>8090</code>.
+        O <code>307</code> mantém o POST e seus cabeçalhos ao redirecionar a chamada para esta API.
+        Como a porta muda, o navegador envia um <code>OPTIONS</code> antes de enviar o POST.</p>
+      <dl>
+        <dt>O navegador pede permissão para os dois cabeçalhos</dt>
+        <dd><code>Access-Control-Request-Headers: content-type,x-demo-token</code></dd>
+        <dt>Na porta 8071, um segundo <code>set</code> substitui a lista</dt>
+        <dd><code>Access-Control-Allow-Headers: X-Demo-Token</code></dd>
+        <dt>No cenário original da 8071, a API usa a lista inicial</dt>
+        <dd><code>Access-Control-Allow-Headers: Content-Type</code></dd>
+        <dt>A porta 8070 usa <code>merge</code> e acrescenta à lista existente</dt>
+        <dd><code>Access-Control-Allow-Headers: Content-Type, X-Demo-Token</code></dd>
+      </dl>
+      <p>Mesmo com <code>204</code> no <code>OPTIONS</code>, o navegador bloqueia o POST quando a lista
+        deixa de fora um dos cabeçalhos que ele pediu. Uma chamada direta da <code>8090</code>
+        com os mesmos cabeçalhos passa pela mesma verificação.</p>
+      <p>Uma única diretiva <code>set</code> também funciona se receber a lista completa.</p>
+      <p><code>Header always set Access-Control-Allow-Headers "Content-Type, X-Demo-Token"</code></p>
+    </section>
+  </main>
+</body>
+</html>

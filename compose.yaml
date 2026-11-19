@@ -27,3 +27,12 @@ services:
     volumes:
       - ./apache:/demo/apache:ro
       - ./api:/demo/api:ro
+
+  api-com-erro:
+    image: httpd:2.4
+    command: [httpd-foreground, -c, 'Include /demo/apache/api-com-erro.conf']
+    ports:
+      - '127.0.0.1:8071:80'
+    volumes:
+      - ./apache:/demo/apache:ro
+      - ./api:/demo/api:ro
