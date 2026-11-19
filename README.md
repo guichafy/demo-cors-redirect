@@ -79,6 +79,63 @@ sequenceDiagram
 
 Os códigos `307` e `204` na interface refletem a configuração da PoC. O resultado do POST vem do `fetch`. A página reconstrói a mensagem de CORS do Chrome com a rota e o cabeçalho ausente do cenário.
 
+## Conferir o preflight com curl
+
+Com os Apaches rodando, cole esta função no terminal. Ela envia o mesmo `OPTIONS` para as três URLs, com a origem da página, o método `POST` e os dois cabeçalhos solicitados pelo navegador.
+
+```sh
+preflight() {
+  curl -sS -i -X OPTIONS \
+    -H 'Origin: http://localhost:8090' \
+    -H 'Access-Control-Request-Method: POST' \
+    -H 'Access-Control-Request-Headers: content-type,x-demo-token' \
+    "$1"
+}
+```
+
+As saídas abaixo destacam o status HTTP e o cabeçalho que explica o resultado.
+
+### Erro na 8071 por falta de Content-Type
+
+```sh
+preflight 'http://localhost:8071/receber.cgi'
+```
+
+```http
+HTTP/1.1 204 No Content
+Access-Control-Allow-Headers: X-Demo-Token
+```
+
+O segundo `set` deixou só `X-Demo-Token` na lista. O navegador bloqueia o POST com JSON porque falta `Content-Type`.
+
+### Erro original na 8071 por falta de X-Demo-Token
+
+```sh
+preflight 'http://localhost:8071/receber.cgi?cenario=original'
+```
+
+```http
+HTTP/1.1 204 No Content
+Access-Control-Allow-Headers: Content-Type
+```
+
+A API permite apenas `Content-Type`. O navegador bloqueia o POST porque falta `X-Demo-Token`.
+
+### Correção na 8070 com os dois cabeçalhos
+
+```sh
+preflight 'http://localhost:8070/receber.cgi'
+```
+
+```http
+HTTP/1.1 204 No Content
+Access-Control-Allow-Headers: Content-Type, X-Demo-Token
+```
+
+O `merge` mantém `Content-Type` e acrescenta `X-Demo-Token`. A origem e o método já são permitidos, então o navegador envia o POST.
+
+O `curl` exibe a resposta do Apache. A decisão de bloquear ou enviar o POST é do navegador. Por isso, os três preflights retornam `204`, mas só o da `8070` permite esse POST.
+
 ## Configuração do Apache
 
 Os dois servidores carregam [apache/api-base.conf](apache/api-base.conf), que permite `Content-Type`, e usam o mesmo [endpoint CGI](api/receber.cgi).
